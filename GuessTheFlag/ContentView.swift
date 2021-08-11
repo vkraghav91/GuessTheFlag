@@ -34,11 +34,9 @@ struct ContentView: View {
                     Button(action: {
                         self.flagTapped(number)
                     }){
-                        Image(self.countries[number])
-                            .renderingMode(.original)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
-                            .shadow(color: .black, radius: 2)
+                      //  flagImage(imageName: countries[number])
+                        FlagImage(imageName: countries[number])
+
                     }
                 }
                 
@@ -70,6 +68,23 @@ struct ContentView: View {
         correctAnswer = Int.random(in: 0...3)
     }
 }
+// image view for flags
+struct FlagImage: View{
+    var imageName:String
+    var body: some View{
+        Image(imageName)
+            .renderingMode(.original)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
+            .shadow(color: .black, radius: 2)
+    }
+}
+extension View{
+    func flagImage(imageName:String) -> some View {
+        FlagImage(imageName: imageName)
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()

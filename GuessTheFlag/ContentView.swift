@@ -10,34 +10,54 @@ import SwiftUI
 struct ContentView: View {
     @State private var countries = ["Estonia","France","Germany","Ireland","Italy","Nigeria","Poland","Russia","UK","US"]
         .shuffled()
-    @State private var correctAnswer = Int.random(in: 0...3)
+    @State private var correctAnswer = Int.random(in: 0..<3)
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var score = 0
     @State private var message = ""
+    
+    //properties for animations
+    @State private var selectedNumber = 0
+    @State private var isWrong = false
+    @State private var isCorrect = false
+    @State private var fadeOutOpacity = false
+
     
     var body: some View{
         ZStack{
             //Color.blue.edgesIgnoringSafeArea(.all)
             LinearGradient(gradient: Gradient(colors: [Color.blue, Color.black]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all)
             VStack(spacing: 30){
+                Spacer()
                 VStack{
                     Text("Tap the flag of :")
                         .foregroundColor(.white)
-                    Text(countries[correctAnswer])
+                        .font(.title)
+                        .bold()
+                    Text(self.countries[correctAnswer])
                         .foregroundColor(.white)
                         .font(.largeTitle)
                         .fontWeight(.black)
                 }
                 
-                ForEach(0..<4){ number in
+                ForEach(0..<3){ number in
                     Button(action: {
-                        self.flagTapped(number)
+                        withAnimation{
+                            self.flagTapped(number)
+                        }
                     }){
-                      //  flagImage(imageName: countries[number])
-                        FlagImage(imageName: countries[number])
+                          flagImage(imageName: countries[number])
+                        //FlagImage(imageName: countries[number])
+                    }.rotation3DEffect(
+                        .degrees(self.isCorrect&&(self.selectedNumber==number) ? 360:0),
+                        axis: (x: 0.0, y: 1.0, z: 0.0)
+                        )
+                    .rotation3DEffect(
+                        .degrees(self.isWrong&&(self.selectedNumber==number) ? 90:0),
+                        axis: (x: 1.0, y: 0.0, z: 1.0)
+                        )
+                    .opacity(self.fadeOutOpacity && !(self.selectedNumber==number) ? 0.25:1)
 
-                    }
                 }
                 
                 Text("Your Current Score is: \(self.score)")
@@ -52,20 +72,29 @@ struct ContentView: View {
         }
     }
     func flagTapped(_ number:Int){
+        self.selectedNumber = number
         if number == correctAnswer{
-            scoreTitle = "Correct Answer"
-            score += 1
+            self.isCorrect = true
+            self.fadeOutOpacity = true
+            self.scoreTitle = "Correct Answer"
+            self.score += 1
             self.message = "Your score is \(score)"
         } else{
-            scoreTitle = "Wrong Answer"
-            score -= 1
+            self.isWrong = true
+            self.scoreTitle = "Wrong Answer"
+            self.score -= 1
             self.message = "That is the flag of \(countries[number]) \n Your score is \(score)"
         }
-        showingScore = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1){
+            self.showingScore = true
+        }
     }
     func askQuestion(){
-        countries.shuffle()
-        correctAnswer = Int.random(in: 0...3)
+        self.countries.shuffle()
+        self.correctAnswer = Int.random(in: 0..<3)
+        self.fadeOutOpacity = false
+        self.isWrong = false
+        self.isCorrect = false
     }
 }
 // image view for flags
